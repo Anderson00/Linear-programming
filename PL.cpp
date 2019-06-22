@@ -21,6 +21,7 @@ IloObjective obj = IloMaximize(env);
 IloCplex cplex(env);
 
 void createModel() {
+    
     IloExpr exp(env);
     IloRangeArray con(env);
 
@@ -52,7 +53,6 @@ void createModel() {
 	exp += 3*var_x[0] + 2*var_x[1];
         con.add(IloRange(env, exp, 18));
         exp.clear();
-
         model.add(con);
         con.clear();
         model.add(obj);
@@ -67,24 +67,17 @@ void createModel() {
     }
 }
 
-void createModel2(){
-    IloExpr exp(env);
-    IloRangeArray con(env);
+/*void createModel2(){
+    
 
 
     try{
-        double coef[2];
-        for(int i = 0; i < 2; i++){
-            char name[20];
-            sprintf(name, "x%d", i + 1);
-            var_x.add(IloNumVar(env,0,IloInfinity));
-            var_x[i].setName(name);
-        }
-        coef[0] = 2;
-        coef[1] = 3;
+        
+        IloNumArray array(env, 2, 2, 3);
 
-        for(int i = 0; i < 2; i++) obj.setLinearCoef(var_x[i], coef[i]);
-
+        //for(int i = 0; i < 2; i++) obj.setLinearCoef(var_x[i], coef[i]);
+        obj = IloMaximize(env, IloScalProd(var_x, array));
+        
         
         exp += -1*var_x[0] + 2*var_x[1];
         con.add(IloRange(env,exp, 4));
@@ -110,7 +103,7 @@ void createModel2(){
     catch (...) {
         cerr << "Unknown exception caught" << endl;
     }
-}
+}*/
 
 bool solveMaster(double *x, double *sol_val) {    // Return true if the master problem is feasible
     // Optimize the problem
@@ -175,7 +168,7 @@ int main (int argc, char *argv[]) {
     // Solving the problem
     cplex.setOut(env.getNullStream());      // Do not print cplex informations
     cplex.setWarning(env.getNullStream());  // Do not print cplex warnings
-    createModel2();
+    createModel();
     Procedure();
 
     // Free memory
