@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",                
+                "/usr/include/c++/5.4.0/",
+                "usr/local/include/",
+                "usr/include/",
+                "/opt/ibm/ILOG/CPLEX_Studio1261/cplex/include/*",
+                "/opt/ibm/ILOG/CPLEX_Studio1261/concert/include/*"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
