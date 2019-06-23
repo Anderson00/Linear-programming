@@ -2,5 +2,9 @@
     "C_Cpp.default.includePath": [
         "/opt/ibm/ILOG/CPLEX_Studio1261/cplex/include/",
         "/opt/ibm/ILOG/CPLEX_Studio1261/concert/include/"
-    ]
+    ],
+    "files.associations": {
+        "iostream": "cpp",
+        "iosfwd": "cpp"
+    }
 }
