@@ -134,7 +134,8 @@ int main (int argc, char *argv[]) {
     //Procedure();
     start = clock();
     Toolkit::Problem problem("problems/exemplo1.txt", env, cplex);
-    problem.readFile();
+    problem.setOutputFileName("saida/PL1_Dual.txt");
+    problem.readFile(false);
     problem.run();
 
     // Free memory

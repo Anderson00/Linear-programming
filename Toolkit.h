@@ -25,6 +25,8 @@ namespace Toolkit{
     class Problem{
     public:
         Problem(string file_name, IloEnv& env, IloCplex& cplex) : file(file_name),
+            file_name(file_name),
+            output_name("padrao.txt"),
             env(env), 
             cplex(cplex),
             model(env), 
@@ -41,17 +43,21 @@ namespace Toolkit{
           }
         }
 
-        void readFile();
+        void readFile(bool dual);
+        bool balancear();//Só balancea se necessario
         void run();
         //getters
         IloObjective& getObjective();
         IloModel& getModel();
         //setters
+        void setOutputFileName(string file_name);
 
         //others
         bool hasError();
         bool isBalanced();
     private:
+        void dual();
+        string file_name, output_name;
         bool erro = false;
         int n = 0, m = 0; //n e m; linha e colunas
         IloNum deman = 0,ofer = 0;//demanda e oferta, valores

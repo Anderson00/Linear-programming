@@ -2,13 +2,17 @@
 
 using namespace Toolkit;
 
-void Problem::readFile(){
+void Problem::readFile(bool dual = false){
     if(file.is_open()){
         file >> n;
         file >> m;
         #ifdef DEBUG
             cout << n << " " << m << endl;
         #endif
+        if(dual){
+            this->dual();
+            return;
+        }
         
         //IloArray<IloNumArray> custo(env, n);
         for(int i = 0; i < n; i++){//Inicializa matrix de custo
@@ -35,6 +39,8 @@ void Problem::readFile(){
             this->ofer += num;
         }
 
+        this->balancear();//Só balancea se necessario
+
         #ifdef DEBUG
             for(int i = 0; i < n; i++){
                 for(int j = 0; j < m; j++){
@@ -58,13 +64,26 @@ void Problem::readFile(){
     }
 }
 
+bool Problem::balancear(){
+    if(isBalanced())
+        return false;
+    if(ofer > deman){
+        demanda.add(ofer - deman);
+        for(int i = 0; i < n; i++){
+            (*custo[i]).add(0);
+        }
+        this->m += 1;
+    }
+
+    return true;
+}
+
 void Problem::run(){
-    cout << "É balanceado: " << isBalanced() << endl;
     clock_t start, end;
     start = clock();
     IloArray<IloNumVarArray> var_x(env, n);
     for(int i = 0; i < n; i++){
-        var_x[i] = IloNumVarArray(env,m, 0, IloInfinity);
+        var_x[i] = IloNumVarArray(env, m, 0, IloInfinity);
     }
 
     IloExpr expr(env);
@@ -92,8 +111,13 @@ void Problem::run(){
         expr.clear();
     }
 
+    string s;
+    stringstream str(s);
+    str << this->output_name;
+    str << ".lp";
+
     this->cplex.extract(model);
-    this->cplex.exportModel("PL3.lp");
+    this->cplex.exportModel(str.str().c_str());
 
     env.out() << "Variaveis binarias: " << cplex.getNbinVars() << endl;
     env.out() << "Variaveis Inteiras: " << cplex.getNintVars() << endl;
@@ -106,7 +130,8 @@ void Problem::run(){
     }
     end = clock();
     // Get solution
-    ofstream saida("saida/PL3_lp.txt");
+
+    ofstream saida(this->output_name);
     
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
@@ -114,6 +139,7 @@ void Problem::run(){
         }
         saida << endl;
     }
+    saida << "Balanceado: " << ((isBalanced())? "Sim": "Não") << endl;
     saida << "Status: " << cplex.getStatus() << endl;
     saida << "Valor Fobj: " << cplex.getObjValue() << endl;
     saida << "Tempo: " << end - start;
@@ -137,4 +163,12 @@ bool Problem::isBalanced(){
     if(this->deman == this->ofer)
         return true;
     return false;
+}
+
+void Problem::setOutputFileName(string file_name){
+    this->output_name = file_name;
+}
+
+void Problem::dual(){
+    
 }
