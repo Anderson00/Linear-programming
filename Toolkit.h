@@ -4,29 +4,41 @@
 #include <fstream>
 #include <ilcplex/ilocplex.h>
 
+//#define DEBUG
+
 using namespace std;
 
 namespace Toolkit{
     /*
-    * Extrai os coeficientes do arquivo.
-    * O arquivo que guarda os dados é padroniazado da seguinte forma:
+    * Extrai os coeficientes e outros dados do arquivo.
+    * O arquivo é padronizado da seguinte forma:
     * linha     texto                   Descrição
-    *   1       n, m\n                  n,m são respectivamente linhas e colunas
-    *   2       x11, x12, x13,..., x1m  Matrix[n, m] de custo da função objetivo.
-    *   3       x21, x22, x23,..., x2m
-    *   4       x31, x32, x33,..., x3m
-    *   .       ......................
-    *   n+1     xn1, xn2, xn3,..., xnm
+    *   1       n m                     n,m são respectivamente linhas e colunas
+    *   2       x11 x12 x13 ... x1m     Matrix[n, m] de custo da função objetivo.
+    *   3       x21 x22 x23 ... x2m
+    *   4       x31 x32 x33 ... x3m
+    *   .       ...................
+    *   n+1     xn1 xn2 xn3 ... xnm
+    *           D1 D2 D3 ... DM         Demanda
+    *           O1 O2 O3 ... ON         Oferta
     */
     class Problem{
     public:
-        Problem(string file_name, IloEnv& env) : file(file_name), 
+        Problem(string file_name, IloEnv& env, IloCplex& cplex) : file(file_name),
+            env(env), 
+            cplex(cplex),
             model(env), 
+            custo(env),
             objective(env),
-            var_x(env),
+            demanda(env),
+            oferta(env),
             erro(!file.is_open()) {}
+
         ~Problem(){
-          file.close();  
+          file.close();
+          for(int i = 0; i < custo.getSize(); i++){
+            delete custo[i];
+          }
         }
 
         void readFile();
@@ -38,11 +50,19 @@ namespace Toolkit{
 
         //others
         bool hasError();
+        bool isBalanced();
     private:
         bool erro = false;
+        int n = 0, m = 0; //n e m; linha e colunas
+        IloNum deman = 0,ofer = 0;//demanda e oferta, valores
+
         fstream file;
+        IloEnv& env;
+        IloCplex& cplex;
         IloObjective objective;
-        IloNumVarArray var_x;
+        IloArray<IloNumArray*> custo;
+        IloNumArray demanda;
+        IloNumArray oferta;
         IloModel model;
     };
 }

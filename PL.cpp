@@ -6,7 +6,8 @@
 #include <ilcplex/ilocplex.h>
 #include <vector>
 #include <list>
-#include"readFile.h"
+#include "readFile.h"
+#include "Toolkit.h"
 
 #define eps 0.000001
 
@@ -67,44 +68,6 @@ void createModel() {
     }
 }
 
-/*void createModel2(){
-    
-
-
-    try{
-        
-        IloNumArray array(env, 2, 2, 3);
-
-        //for(int i = 0; i < 2; i++) obj.setLinearCoef(var_x[i], coef[i]);
-        obj = IloMaximize(env, IloScalProd(var_x, array));
-        
-        
-        exp += -1*var_x[0] + 2*var_x[1];
-        con.add(IloRange(env,exp, 4));
-        exp.clear();
-
-        exp += var_x[0] + 2*var_x[1];
-        con.add(IloRange(env,exp, 6));
-        exp.clear();
-
-        exp += 1*var_x[0] + 3*var_x[1];
-        con.add(IloRange(env,exp, 9));
-        exp.clear();
-
-        model.add(con);
-        con.clear();
-        model.add(obj);
-        cplex.extract(model);
-        cplex.exportModel("PL2.lp");
-
-    }catch (IloException& e) {
-        cerr << "Concert exception caught: " << e << endl;
-    }
-    catch (...) {
-        cerr << "Unknown exception caught" << endl;
-    }
-}*/
-
 bool solveMaster(double *x, double *sol_val) {    // Return true if the master problem is feasible
     // Optimize the problem
     if ( !cplex.solve() && cplex.getStatus() != IloAlgorithm::Infeasible) {
@@ -164,12 +127,15 @@ int main (int argc, char *argv[]) {
 
     clock_t start, end;
     double elapsed;
-    start = clock();
     // Solving the problem
     cplex.setOut(env.getNullStream());      // Do not print cplex informations
     cplex.setWarning(env.getNullStream());  // Do not print cplex warnings
-    createModel();
-    Procedure();
+    //createModel();
+    //Procedure();
+    start = clock();
+    Toolkit::Problem problem("problems/exemplo1.txt", env, cplex);
+    problem.readFile();
+    problem.run();
 
     // Free memory
 
