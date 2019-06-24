@@ -45,7 +45,9 @@ namespace Toolkit{
 
         void readFile(bool dual);
         bool balancear();//Só balancea se necessario
-        void run();
+        
+        void runPrimal();
+        void runDual();
         //getters
         IloObjective& getObjective();
         IloModel& getModel();
@@ -56,9 +58,11 @@ namespace Toolkit{
         bool hasError();
         bool isBalanced();
     private:
+        void run();//primal;
         void dual();
         string file_name, output_name;
         bool erro = false;
+        bool isdual = false;
         int n = 0, m = 0; //n e m; linha e colunas
         IloNum deman = 0,ofer = 0;//demanda e oferta, valores
 

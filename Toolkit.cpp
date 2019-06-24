@@ -3,6 +3,10 @@
 using namespace Toolkit;
 
 void Problem::readFile(bool dual = false){
+    if(file.eof()){
+        file.clear();
+        file.seekg(0);
+    }
     if(file.is_open()){
         file >> n;
         file >> m;
@@ -130,7 +134,7 @@ void Problem::run(){
     }
     end = clock();
     // Get solution
-
+    
     ofstream saida(this->output_name);
     
     for(int i = 0; i < n; i++){
@@ -139,10 +143,12 @@ void Problem::run(){
         }
         saida << endl;
     }
+
+    saida << "Primal" << endl;
     saida << "Balanceado: " << ((isBalanced())? "Sim": "Não") << endl;
     saida << "Status: " << cplex.getStatus() << endl;
     saida << "Valor Fobj: " << cplex.getObjValue() << endl;
-    saida << "Tempo: " << end - start;
+    saida << "Tempo: " << ((double) (end - start)) / CLOCKS_PER_SEC << " second(s)";
 
     saida.close();   
 
@@ -170,5 +176,111 @@ void Problem::setOutputFileName(string file_name){
 }
 
 void Problem::dual(){
+    clock_t start = clock();
+    IloModel model(env);
+
+    IloNumVarArray var_u(env);
+    for(int i = 0; i < n; i++){
+        string str;
+        stringstream ss(str);
+        ss << "u" << i+1;
+        IloNumVar var = IloNumVar(env,0, IloInfinity);
+        var.setName(ss.str().c_str());
+        var_u.add(var);        
+    }
+
+    IloNumVarArray var_v(env);
+    for(int i = 0; i < m; i++){
+        string str;
+        stringstream ss(str);
+        ss << "v" << i+1;
+        IloNumVar var = IloNumVar(env, 0, IloInfinity);
+        var.setName(ss.str().c_str());
+        var_v.add(var);
+    }
+    IloExpr expr(env);
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            expr += var_u[i] + var_v[j];
+            IloNum num;
+            file >> num;
+            model.add(expr <= num);
+            expr.clear();
+        }
+    }
     
+    IloExpr exp_u(env);
+    IloExpr exp_v(env);
+
+    for(int i = 0; i < m; i++){
+        IloNum num;
+        file >> num;
+
+        exp_v += num * var_v[i];
+    }
+    
+    for(int i = 0; i < n; i++){
+        IloNum num;
+        file >> num;
+
+        exp_u += num * var_u[i];
+    }
+
+    model.add(IloMaximize(env,exp_u + exp_v));
+    
+    string s;
+    stringstream str(s);
+    str << this->output_name;
+    str << "_Dual";
+    str << ".lp";
+
+    this->cplex.extract(model);
+    this->cplex.exportModel(str.str().c_str());
+
+    env.out() << "Variaveis binarias: " << cplex.getNbinVars() << endl;
+    env.out() << "Variaveis Inteiras: " << cplex.getNintVars() << endl;
+	env.out() << "Filas - Restrições: " << cplex.getNrows() << endl;
+    env.out() << "Colunas - Variaveis: " << cplex.getNcols() << endl;
+
+    if(!this->cplex.solve()){
+        cerr << "Não Foi possivel resolver o Problema" << endl;
+        throw(-1);
+    }
+    clock_t end = clock();
+    // Get solution
+
+    string staux;
+    stringstream ss2(staux);
+    ss2 << this->output_name;
+    ss2 << "_Dual";
+    ofstream saida(ss2.str());
+    
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            saida << cplex.getValue(var_u[i]) << " " << cplex.getValue(var_v[j]) << endl;
+        }
+        saida << endl;
+    }
+    
+    saida << "Dual" << endl;
+    saida << "Balanceado: " << ((isBalanced())? "Sim": "Não") << endl;
+    saida << "Status: " << cplex.getStatus() << endl;
+    saida << "Valor Fobj: " << cplex.getObjValue() << endl;
+    saida << "Tempo: " << ((double) (end - start)) / CLOCKS_PER_SEC << " second(s)";
+
+    saida.close();   
+
+    #ifdef DEBUG
+        cout << "Chego aqui" << endl;
+    #endif
+
+}
+
+void Problem::runPrimal(){
+    this->readFile();
+    this->run();
+}
+
+void Problem::runDual(){
+    this->readFile(true);
 }

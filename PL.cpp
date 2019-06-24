@@ -105,25 +105,14 @@ void Procedure() {
 
 
 int main (int argc, char *argv[]) {
-    /*
-    if (argc < 2) {
-        printf("Please, specify the file.\n");
+    
+    if (argc < 4) {
+        printf("Argumentos incorretos\n");
+        printf("[1 ou 0] output input\n");// 1 == dual, 0 == primal
         return 0;
     }
-    FILE * pFile = fopen(argv[1], "r");
-    if (pFile == NULL) {
-        printf("Could not open %s.\n", argv[1]);
-        return 0;
-    }
-
-    if (readFile(pFile, graph, &n, &m)) {
-        fclose(pFile);
-        printf("Could not read file %s.", argv[1]);
-        return 0;
-    }
-    fclose(pFile);*/
-
-    n=2;	// REMOVE THIS LINE TO START YOUR WORK!
+    int dual = atoi(argv[1]);
+    
 
     clock_t start, end;
     double elapsed;
@@ -133,10 +122,15 @@ int main (int argc, char *argv[]) {
     //createModel();
     //Procedure();
     start = clock();
-    Toolkit::Problem problem("problems/exemplo1.txt", env, cplex);
-    problem.setOutputFileName("saida/PL1_Dual.txt");
-    problem.readFile(false);
-    problem.run();
+    Toolkit::Problem problem(argv[3], env, cplex);
+    problem.setOutputFileName(argv[2]);
+    //problem.readFile(true);
+    //problem.run();
+    if(dual){
+        problem.runDual();
+    }else{
+        problem.runPrimal();
+    }
 
     // Free memory
 

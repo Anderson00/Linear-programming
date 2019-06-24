@@ -1,7 +1,0 @@
-0 10 25 0 
-45 0 5 0 
-0 10 0 30 
-Balanceado: Sim
-Status: Optimal
-Valor Fobj: 1020
-Tempo: 1733
